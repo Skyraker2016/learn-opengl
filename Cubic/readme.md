@@ -12,7 +12,7 @@
 3. 着色器
 4. 深度测试
 
-## [源码](https://github.com/Skyraker2016/learn-opengl/blob/master/cubic.cpp)
+## [源码](https://github.com/Skyraker2016/learn-opengl/blob/master/Cubic/cubic.cpp)
 
 
 ## 结果
