@@ -42,6 +42,7 @@
     ```
     Segmentation fault (core dumped)
     ```
+2. 若提示`./cubic command not found`则先`chmod u+x cubic`
 
 ## 参考来源
 [绘制旋转立方体](https://blog.csdn.net/wodownload2/article/details/78139273)
