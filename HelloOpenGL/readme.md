@@ -1,5 +1,12 @@
 # VSCode + GLFW + GLEW 在ubuntu下的安装
-
+## 环境说明
+* 开发环境：Linux
+* 运行环境：Linux
+* 运行方式：
+    * 首先在`/HelloOpenGL`文件夹（本文件夹）下打开终端，用`export LD_LIBRARY_PATH=./../dll`，增加动态库搜索路径
+    * 运行可执行文件`./helloOpenGL`
+    * 若失败，则按照GLFW、GLEW的配置方法配置好环境后在本机重新编译
+* 使用库：GLFW、GLEW、GLM
 ## 安装
 ### OpenGL（包括GLUT）：
 ```
