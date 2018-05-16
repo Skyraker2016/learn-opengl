@@ -172,14 +172,13 @@ index算错，整体向后偏移一个，因此最后一个index对应的点在�
 ```
 改为以下即可：
 ```cpp
-            vects.push_back(x_cur+x);
-            vects.push_back(y_cur+y);
-            vects.push_back(z_cur+z);
-
+        vects.push_back(x_cur+x);
+        vects.push_back(y_cur+y);
+        vects.push_back(z_cur+z);
 ```
 ![0,0,1 success](https://raw.githubusercontent.com/Skyraker2016/markdownpic/master/SUN_002_2.gif)
 
-## 源代码
+## [源代码](https://github.com/Skyraker2016/learn-opengl/tree/master/PlanetRotation)
 
 ## 参考资料
 [球体生成](http://ningxingxing.com/archives/178)
