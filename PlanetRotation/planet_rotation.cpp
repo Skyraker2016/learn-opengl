@@ -13,8 +13,8 @@ using namespace std;
 
 void key_callback(GLFWwindow *window,int key,int sccncode,int action,int mode);  
 // 旋转相关
-float public_rotate = -1.0f; //公转，+为逆时针，-为顺时针（从北半球观察）
-float self_rotate = -9.0f;   //自转，+为逆时针，-为顺时针（从北半球观察）
+float public_rotate = -0.5f; //公转，+为逆时针，-为顺时针（从北半球观察）
+float self_rotate = -5.0f;   //自转，+为逆时针，-为顺时针（从北半球观察）
 bool view_flag = false;     //是否旋转视角
 glm::vec3 view_rotate_dir;  //旋转绕轴，0,0,1为左右，0,1,0为上下
 float view_rotate; //视角旋转方向
@@ -72,7 +72,7 @@ int main()
 // DATA SUN ××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
     vector<float> vexs;
     vector<unsigned int> inds;
-    generatePlanetTriangle(vexs, inds, 0, 0, 0, 1.8, 30, 15);
+    generatePlanetTriangle(vexs, inds, 0, 0, 0, 1.8, 36, 18);
     // SUN
     GLuint SUN;
     glGenVertexArrays(1, &SUN);
@@ -97,7 +97,7 @@ int main()
 // DATA PLANET ××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
     vector<float> vexsP;
     vector<unsigned int> indsP;
-    generatePlanetTriangle(vexsP, indsP, 3, 0, 0, 0.8, 16, 8);
+    generatePlanetTriangle(vexsP, indsP, 0, 0, 0, 0.8, 18, 9);
 
     GLuint PLANET;
     glGenVertexArrays(2, &PLANET);
@@ -156,17 +156,19 @@ int main()
     glDeleteShader(vertexShader);  
     glDeleteShader(fragmentShader);  
 
-//安排透视视角----------------------------------------------------------------------------------------------------------------------------
+//安排视角----------------------------------------------------------------------------------------------------------------------------
     glm::mat4 Projection = glm::perspective(glm::radians(90.0f), (float) width / (float)height, 0.1f, 100.0f);
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 model_planet = glm::mat4(1.0f);
-
     glm::mat4 View = glm::lookAt(
         glm::vec3(0,0,5), // Camera is at (4,3,3), in World Space
         glm::vec3(0,0,0), // and looks at the origin
         glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
     ); 
 
+    glm::mat4 model = glm::mat4(1.0f);
+    float planet_self = 0;
+    float planet_public = 0;
+    glm::vec3 position = glm::vec3(3, 0, 0);
+    glm::mat4 mvp;
 
 //××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
     while (!glfwWindowShouldClose(window))
@@ -178,29 +180,36 @@ int main()
 
         glUseProgram(shaderProgram);
 
-
-        View = glm::rotate(View, glm::radians(public_rotate), glm::vec3(0, 0, 1.0f));   //旋转视角以公转
         if(view_flag){
             View = glm::rotate(View, glm::radians(view_rotate), view_rotate_dir);   //旋转视角以观察
             view_flag = false;
         }
 
-        model = glm::rotate(model, glm::radians(-public_rotate), glm::vec3(0, 0, 1.0f)); //旋转大球以让大球看起来静止
-        glm::mat4 mvp = Projection * View * model;
+        mvp = Projection * View * model;
 
         unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
-
 
         glBindVertexArray(SUN);
         glDrawElements(GL_LINE_STRIP, inds.size(), GL_UNSIGNED_INT, (void*)0); // we use index buffer, so set it to null.  
 
 
         glBindVertexArray(PLANET);
-        model_planet *= glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 0.0f, 0.0f));
-        model_planet = glm::rotate(model_planet, glm::radians(self_rotate), glm::vec3(0, 0, 1.0f));
-        model_planet *= glm::translate(glm::mat4(1.0f), glm::vec3(-3.0f, 0.0f, 0.0f)); 
-        mvp = Projection * View * model_planet;
+        
+        planet_self = planet_self + self_rotate;
+        if (planet_self > 360)
+            planet_self -= 360;
+        else if (planet_self < 0)
+            planet_self += 360;
+        planet_public = (planet_public + public_rotate);
+        if (planet_public > 360)
+            planet_public -= 360;
+        else if (planet_public < 0)
+            planet_public += 360;
+        glm::mat4 public_trans = glm::rotate(model, glm::radians(planet_public), glm::vec3(0, 0, 1));
+        glm::mat4 position_trans = glm::translate(model, position);
+        glm::mat4 self_trans = glm::rotate(model, glm::radians(planet_self), glm::vec3(0, 0, 1));
+        mvp = Projection * View * public_trans * position_trans * self_trans;
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 
         glDrawElements(GL_LINE_STRIP, indsP.size(), GL_UNSIGNED_INT, (void*)0); // we use index buffer, so set it to null.  
@@ -224,15 +233,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     else if (key == GLFW_KEY_D && action == GLFW_PRESS){
         if (mode == GLFW_MOD_SHIFT)
-            self_rotate = -9.0f;
+            self_rotate = -5.0f;
         else
-            self_rotate = 9.0f;
+            self_rotate = 5.0f;
     }
     else if (key == GLFW_KEY_Y && action == GLFW_PRESS){
         if (mode == GLFW_MOD_SHIFT)
-            public_rotate = -1.0f;
+            public_rotate = -0.5f;
         else
-            public_rotate = 1.0f;
+            public_rotate = 0.5f;
     }
     else if (key == GLFW_KEY_UP && action == GLFW_REPEAT){
         view_flag = true;

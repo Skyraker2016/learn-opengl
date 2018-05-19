@@ -1,5 +1,7 @@
 # 星球公转与自转
 
+* 更新：将公转矩阵与摄像机矩阵分离，公用变换（摄像机、透视）与各个物体的单独变换分离，使代码更符合逻辑。
+
 ## 环境说明
 * 开发环境：Linux
 * 运行环境：Linux
@@ -33,10 +35,16 @@
 
 2. 生成缓冲区：将生成的球体顶点与顶点索引绑定至缓冲区，VAO分别为`SUM`和`PLANET`，代表大球（太阳）及小球（行星）
 3. 生成着色器
-4. 绘制：`View`管理公转及观察视角，`model`和`model_planet`分别管理两个星球
+<!-- 4. 绘制：`View`管理公转及观察视角，`model`和`model_planet`分别管理两个星球
     1. 旋转摄像矩阵`View`，产生公转的情景。同时，为了避免大球跟随旋转，需要反向旋转。
-    2. 以小球原点所在的ｚ方向为轴，旋转小球——将小球移动至原点进行旋转，再移动回自己的轨迹上。
-    1. 分别绑定两个缓冲区，分别绘制两个星球。
+    2. 以小球原点所在的ｚ方向为轴，旋转小球——将小球移动至原点进行旋转，再移动回自己的轨迹上。 -->
+4. 绘制：`View`作为摄像机视角，`Projection`为透视矩阵，这二者为全局公用。
+    1. 按处理对象，分为两种矩阵——公共矩阵及单个模型的矩阵；
+    2. `self_trans`设为小球的旋转矩阵，管理自转；
+    3. `position_trans`设为小球的轨道初始坐标
+    3. `public_trans`设为小球的坐标矩阵，管理公转；
+    4. 按照`mvp = Projection * View * public_trans * position_trans * self_trans;`顺序管理小球——先自转，再移动，后以透视视角形变。
+    2. 分别绑定两个缓冲区，分别绘制两个星球。
 5. 交互：设置键盘事件，管理自转与公转的旋转角度
     * `ESC`：退出程序
     * `D`：按下后逆时针自转
@@ -112,10 +120,20 @@
         4. 生成变换矩阵，绘制。
         ```cpp
         glBindVertexArray(PLANET);
-        model_planet *= glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 0.0f, 0.0f));
-        model_planet = glm::rotate(model_planet, glm::radians(self_rotate), glm::vec3(0, 0, 1.0f));
-        model_planet *= glm::translate(glm::mat4(1.0f), glm::vec3(-3.0f, 0.0f, 0.0f)); 
-        mvp = Projection * View * model_planet;
+        planet_self = planet_self + self_rotate;
+        if (planet_self > 360)
+            planet_self -= 360;
+        else if (planet_self < 0)
+            planet_self += 360;
+        planet_public = (planet_public + public_rotate);
+        if (planet_public > 360)
+            planet_public -= 360;
+        else if (planet_public < 0)
+            planet_public += 360;
+        glm::mat4 public_trans = glm::rotate(model, glm::radians(planet_public), glm::vec3(0, 0, 1));
+        glm::mat4 position_trans = glm::translate(model, position);
+        glm::mat4 self_trans = glm::rotate(model, glm::radians(planet_self), glm::vec3(0, 0, 1));
+        mvp = Projection * View * public_trans * position_trans * self_trans;
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 
         glDrawElements(GL_LINE_STRIP, indsP.size(), GL_UNSIGNED_INT, (void*)0); // we use index buffer, so set it to null.  
