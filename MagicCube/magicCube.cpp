@@ -12,11 +12,20 @@ using namespace std;
 void generateCubic(vector<float> &verx, vector<unsigned int> &inds, vector<float> &colorGroup, vector<vector<float>> &color);
 void key_callback(GLFWwindow *window,int key,int sccncode,int action,int mode);  
 // 旋转相关
-float public_rotate = -0.5f; //公转，+为逆时针，-为顺时针（从北半球观察）
-float self_rotate = -5.0f;   //自转，+为逆时针，-为顺时针（从北半球观察）
 bool view_flag = false;     //是否旋转视角
 glm::vec3 view_rotate_dir;  //旋转绕轴，0,0,1为左右，0,1,0为上下
 float view_rotate; //视角旋转方向
+
+float v = 4.5f;
+
+float cub_right = 0.0f;
+float cub_left = 0.0f;
+float cub_col = 0.0f;
+float cub_up = 0.0f;
+float cub_down = 0.0f;
+float cub_row = 0.0f;
+float cub_face = 0.0f;
+
 
 vector<float> RED;
 vector<float> ORANGE;
@@ -188,11 +197,16 @@ int main()
                 cub_pos[k].push_back(x);
                 cub_pos[k].push_back(y);
                 cub_pos[k].push_back(z);
-                cout<<cub_pos[k][0]<<" "<<cub_pos[k][1]<<" "<<cub_pos[k][2]<<" "<<endl;
+                // cout<<cub_pos[k][0]<<" "<<cub_pos[k][1]<<" "<<cub_pos[k][2]<<" "<<endl;
                 k++;
             }
         }
     }
+    vector<glm::mat4> cub_color(27);
+    for (int i=0; i<27; i++){
+        cub_color[i] = glm::mat4(1.0f);
+    }
+
 //××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
     while (!glfwWindowShouldClose(window))
     {
@@ -209,14 +223,54 @@ int main()
         }
 
     for (int i=0; i<27; i++)
-    {        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
-            glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(cub_pos[i][0], cub_pos[i][1], cub_pos[i][2]));
-            mvp = Projection * View * trans;
-            // mvp *= glm::translate(model, glm::vec3(i*3, 0, 0));
-            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+    {        
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+        glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(cub_pos[i][0]*0.8, cub_pos[i][1]*0.8, cub_pos[i][2]*0.8));
 
-            glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, 36); // we use index buffer, so set it to null.  
+        if (cub_right > 0 && cub_pos[i][1] == 3.0f ){
+            cub_right -= v;
+            cub_color[i] = glm::rotate(cub_color[i], glm::radians(v), glm::vec3(0.0f, 1.0f, 0.0f));
+            cout<<"D"<<endl;
+        }
+        else if (cub_col > 0 && cub_pos[i][1] == 0.0f){
+            cub_col -= v;
+            cub_color[i] = glm::rotate(cub_color[i], glm::radians(v), glm::vec3(0.0f, 1.0f, 0.0f));
+            cout<<"S"<<endl;
+        }
+        else if (cub_left > 0 && cub_pos[i][1] == -3.0f){
+            cub_left -= v;
+            cub_color[i] = glm::rotate(cub_color[i], glm::radians(v), glm::vec3(0.0f, 1.0f, 0.0f));
+            cout<<"A"<<endl;
+        }
+
+        else if (cub_up > 0 && cub_pos[i][2] == 3.0f){
+            cub_up -= v;
+            cub_color[i] = glm::rotate(cub_color[i], glm::radians(v), glm::vec3(0.0f, 0.0f, 1.0f));
+            cout<<"Y"<<endl;
+        }
+        else if (cub_row > 0 && cub_pos[i][2] == 0.0f){
+            cub_row -= v;
+            cub_color[i] = glm::rotate(cub_color[i], glm::radians(v), glm::vec3(0.0f, 0.0f, 1.0f));
+            cout<<"H"<<endl;
+        }
+        else if (cub_down > 0 && cub_pos[i][2] == -3.0f){
+            cub_down -= v;
+            cub_color[i] = glm::rotate(cub_color[i], glm::radians(v), glm::vec3(0.0f, 0.0f, 1.0f));
+            cout<<"N"<<endl;
+        }
+
+        else if (cub_face > 0 && cub_pos[i][0] == 3.0f){
+            cub_face -= v;
+            cub_color[i] = glm::rotate(cub_color[i], glm::radians(v), glm::vec3(1.0f, 0.0f, 0.0f));
+            cout<<"SPACE"<<endl;
+        }
+
+        mvp = Projection * View * cub_color[i] * trans;
+        // mvp *= glm::translate(model, glm::vec3(i*3, 0, 0));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36); // we use index buffer, so set it to null.  
     }
 
 
@@ -233,6 +287,31 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)  {
         glfwSetWindowShouldClose(window, GL_TRUE);  
     }
+
+    else if (key == GLFW_KEY_A && action == GLFW_PRESS)  {
+        cub_left = 810.0f;
+    }
+    else if (key == GLFW_KEY_S && action == GLFW_PRESS)  {
+        cub_col = 810.0f;
+    }
+    else if (key == GLFW_KEY_D && action == GLFW_PRESS)  {
+        cub_right = 810.0f;
+    }
+
+    else if (key == GLFW_KEY_Y && action == GLFW_PRESS)  {
+        cub_up = 810.0f;
+    }
+    else if (key == GLFW_KEY_H && action == GLFW_PRESS)  {
+        cub_row = 810.0f;
+    }
+    else if (key == GLFW_KEY_N && action == GLFW_PRESS)  {
+        cub_down = 810.0f;
+    }
+
+    else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){
+        cub_face = 810.0f;
+    }
+
     else if (key == GLFW_KEY_UP && action == GLFW_REPEAT){
         view_flag = true;
         view_rotate = 3.0f;
@@ -323,9 +402,9 @@ void generateCubic(vector<float> &verx, vector<unsigned int> &inds, vector<float
         colorGroup.push_back(color[i/6][1]);
         colorGroup.push_back(color[i/6][2]);
     }
-    for (int i=0; i<36; i++){
-        cout << verx[i*3] << verx[i*3+1] << verx[i*3+2]<<"Color: "<<colorGroup[i*3]<<" "<<colorGroup[i*3+1]<<" "<<colorGroup[i*3+2]<<endl;
-    }
+    // for (int i=0; i<36; i++){
+    //     cout << verx[i*3] << verx[i*3+1] << verx[i*3+2]<<"Color: "<<colorGroup[i*3]<<" "<<colorGroup[i*3+1]<<" "<<colorGroup[i*3+2]<<endl;
+    // }
 
-    cout<<verx.size()<<" "<<colorGroup.size();
+    // cout<<verx.size()<<" "<<colorGroup.size();
 }
