@@ -9,7 +9,7 @@ using namespace std;
 
 #define WIDTH 800
 #define HEIGHT 800
-void generateCubic(vector<float> &verx, vector<unsigned int> &inds, vector<float> &colorGroup, vector<vector<float>> &color);
+void generateCubic(vector<float> &verx, vector<float> &colorGroup, vector<vector<float>> &color);
 void key_callback(GLFWwindow *window,int key,int sccncode,int action,int mode);  
 // 旋转相关
 bool view_flag = false;     //是否旋转视角
@@ -109,7 +109,6 @@ int main()
 // DATA CUB ××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××××
     unsigned int VAO;
         vector<float> vexs;
-        vector<unsigned int> inds;
         vector<float> color;
         vector<vector<float>> colorTmp;
         colorTmp.push_back(BLUE);
@@ -118,7 +117,7 @@ int main()
         colorTmp.push_back(YELLOW);
         colorTmp.push_back(WHITE);
         colorTmp.push_back(GREEN);
-        generateCubic(vexs, inds, color, colorTmp);
+        generateCubic(vexs, color, colorTmp);
         // CUB
         unsigned int VBO;
         glGenVertexArrays(1, &(VAO));
@@ -336,38 +335,6 @@ int main()
         if (change_finish == 9){
             lock = true;
         }
-        // for (int kk=0; kk<7; kk++){
-        //     if (change_finish[kk] == 9){
-        //         change_finish[kk] = 0;
-        //         if (kk = 0){
-        //             glm::mat4 color_tmp = glm::mat4(1.0f);
-        //             vector<float> trans_tmp;
-        //             color_tmp = cub_color[8];
-        //             trans_tmp = cub_pos[8];
-        //             cub_color[8] = cub_color[26];
-        //             cub_pos[8] = cub_pos[26];
-        //             cub_color[26] = cub_color[24];
-        //             cub_pos[26] = cub_pos[24];
-        //             cub_color[24] = cub_color[6];
-        //             cub_pos[24] = cub_pos[6];
-        //             cub_color[6] = color_tmp;
-        //             cub_pos[6] = trans_tmp;
-        //             color_tmp = cub_color[25];
-        //             trans_tmp = cub_pos[25];
-        //             cub_color[25] = cub_color[15];
-        //             cub_pos[25] = cub_pos[15];
-        //             cub_color[15] = cub_color[7];
-        //             cub_pos[15] = cub_pos[7];
-        //             cub_color[7] = cub_color[17];
-        //             cub_pos[7] = cub_pos[17];
-        //             cub_color[17] = color_tmp;
-        //             cub_pos[17] = trans_tmp;
-        //         }
-        //         else if (kk = 1){
-
-        //         }
-        //     }
-        // }
 
         glfwSwapBuffers(window);
     }
@@ -439,8 +406,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 
 
-void generateCubic(vector<float> &verx, vector<unsigned int> &inds, vector<float> &colorGroup, vector<vector<float>> &color){
-    float temp[] = {
+void generateCubic(vector<float> &verx, vector<float> &colorGroup, vector<vector<float>> &color){
+        vector<unsigned int> inds;
+        float temp[] = {
         -1.0f, -1.0f,  1.0f,
         -1.0f,  1.0f,  1.0f,
          1.0f, -1.0f,  1.0f,
