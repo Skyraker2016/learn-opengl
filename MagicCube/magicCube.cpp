@@ -17,6 +17,8 @@ glm::vec3 view_rotate_dir;  //旋转绕轴，0,0,1为左右，0,1,0为上下
 float view_rotate; //视角旋转方向
 bool lock = true;
 float v = 10.0f;
+bool replay_flag = false;
+vector<char> reporting;
 
 float cub_right = 0.0f;
 float cub_left = 0.0f;
@@ -339,7 +341,7 @@ int main()
         glfwSwapBuffers(window);
     }
 //收尾
-    glfwTerminate();  
+    glfwTerminate(); 
     return 0;  
 
 }  
@@ -351,32 +353,39 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 
     else if (key == GLFW_KEY_A && action == GLFW_PRESS && lock)  {
+        reporting.push_back('a');
         lock = false;
         cub_left = 810.0f;
     }
     else if (key == GLFW_KEY_S && action == GLFW_PRESS && lock)  {
+        reporting.push_back('s');
         lock = false;
         cub_col = 810.0f;
     }
     else if (key == GLFW_KEY_D && action == GLFW_PRESS && lock)  {
+        reporting.push_back('d');
         lock = false;
         cub_right = 810.0f;
     }
 
     else if (key == GLFW_KEY_Y && action == GLFW_PRESS && lock)  {
+        reporting.push_back('y');
         lock = false;
         cub_up = 810.0f;
     }
     else if (key == GLFW_KEY_H && action == GLFW_PRESS && lock)  {
+        reporting.push_back('h');
         lock = false;
         cub_row = 810.0f;
     }
     else if (key == GLFW_KEY_N && action == GLFW_PRESS && lock)  {
+        reporting.push_back('n');
         lock = false;
         cub_down = 810.0f;
     }
 
     else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS && lock){
+        reporting.push_back(' ');
         lock = false;
         cub_face = 810.0f;
     }
@@ -400,6 +409,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         view_flag = true;
         view_rotate = 3.0f;
         view_rotate_dir = glm::vec3(0.0f, 0.0f, 1.0f);
+    }
+
+    else if (key == GLFW_KEY_ENTER && action == GLFW_PRESS && lock){
+        replay_flag = true;
+        lock = false;
     }
 }  
 
