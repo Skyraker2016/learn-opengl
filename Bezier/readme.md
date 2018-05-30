@@ -58,7 +58,7 @@ g++ -o Bezier Bezier.cpp -lGL -lGLU -lglut -lglfw3 -lX11 -lXrandr -lXinerama -lX
     }
     ```
 
-    ## [源代码]()
+    ## [源代码](https://github.com/Skyraker2016/learn-opengl/blob/master/Bezier/Bezier.cpp)
 
     ## 参考
     [绘制bezier曲线](https://blog.csdn.net/qa1041335855/article/details/72083760)
