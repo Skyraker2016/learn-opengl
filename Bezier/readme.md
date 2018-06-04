@@ -27,7 +27,6 @@ g++ -o Bezier Bezier.cpp -lGL -lGLU -lglut -lglfw3 -lX11 -lXrandr -lXinerama -lX
 ![rabbit](https://raw.githubusercontent.com/Skyraker2016/markdownpic/master/bezier_rabbit.gif)
 *兔子*
 
-
 ## 知识点
 1. 获取鼠标位置：鼠标移动回调函数：
     ```cpp
